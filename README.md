@@ -1,217 +1,11 @@
 
 # Kaggle Challenge: House Prices: Advanced Regression Techniques<br>
-*** Currently in top 5% (143rd in 1890 participants), Last ran on: July 1st, 2017***
-
-
-```python
-#import some necessary librairies
-
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-%matplotlib inline
-import matplotlib.pyplot as plt  # Matlab-style plotting
-import seaborn as sns
-color = sns.color_palette()
-sns.set_style('darkgrid')
-import warnings
-def ignore_warn(*args, **kwargs):
-    pass
-warnings.warn = ignore_warn #ignore annoying warning (from sklearn and seaborn)
-
-
-from scipy import stats
-from scipy.stats import norm, skew #for some statistics
-
-
-pd.set_option('display.float_format', lambda x: '{:.3f}'.format(x)) #Limiting floats output to 3 decimal points
-
-
-
-```
-
-
-```python
-#Now let's import and put the train and test datasets in  pandas dataframe
-
-train = pd.read_csv('data/train.csv')
-test = pd.read_csv('data/test.csv')
-
-```
-
-
-```python
-##display the first five rows of the train dataset.
-train.head(5)
-```
+## Currently in top 5% (143rd in 1890 participants), Last ran on: July 1st, 2017
 
 
 
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Id</th>
-      <th>MSSubClass</th>
-      <th>MSZoning</th>
-      <th>LotFrontage</th>
-      <th>LotArea</th>
-      <th>Street</th>
-      <th>Alley</th>
-      <th>LotShape</th>
-      <th>LandContour</th>
-      <th>Utilities</th>
-      <th>...</th>
-      <th>PoolArea</th>
-      <th>PoolQC</th>
-      <th>Fence</th>
-      <th>MiscFeature</th>
-      <th>MiscVal</th>
-      <th>MoSold</th>
-      <th>YrSold</th>
-      <th>SaleType</th>
-      <th>SaleCondition</th>
-      <th>SalePrice</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>60</td>
-      <td>RL</td>
-      <td>65.000</td>
-      <td>8450</td>
-      <td>Pave</td>
-      <td>NaN</td>
-      <td>Reg</td>
-      <td>Lvl</td>
-      <td>AllPub</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>0</td>
-      <td>2</td>
-      <td>2008</td>
-      <td>WD</td>
-      <td>Normal</td>
-      <td>208500</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>20</td>
-      <td>RL</td>
-      <td>80.000</td>
-      <td>9600</td>
-      <td>Pave</td>
-      <td>NaN</td>
-      <td>Reg</td>
-      <td>Lvl</td>
-      <td>AllPub</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>0</td>
-      <td>5</td>
-      <td>2007</td>
-      <td>WD</td>
-      <td>Normal</td>
-      <td>181500</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>60</td>
-      <td>RL</td>
-      <td>68.000</td>
-      <td>11250</td>
-      <td>Pave</td>
-      <td>NaN</td>
-      <td>IR1</td>
-      <td>Lvl</td>
-      <td>AllPub</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>0</td>
-      <td>9</td>
-      <td>2008</td>
-      <td>WD</td>
-      <td>Normal</td>
-      <td>223500</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>70</td>
-      <td>RL</td>
-      <td>60.000</td>
-      <td>9550</td>
-      <td>Pave</td>
-      <td>NaN</td>
-      <td>IR1</td>
-      <td>Lvl</td>
-      <td>AllPub</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>0</td>
-      <td>2</td>
-      <td>2006</td>
-      <td>WD</td>
-      <td>Abnorml</td>
-      <td>140000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>60</td>
-      <td>RL</td>
-      <td>84.000</td>
-      <td>14260</td>
-      <td>Pave</td>
-      <td>NaN</td>
-      <td>IR1</td>
-      <td>Lvl</td>
-      <td>AllPub</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>0</td>
-      <td>12</td>
-      <td>2008</td>
-      <td>WD</td>
-      <td>Normal</td>
-      <td>250000</td>
-    </tr>
-  </tbody>
-</table>
-<p>5 rows × 81 columns</p>
-</div>
-
-
-
-
-```python
-##display the first five rows of the test dataset.
-test.head(5)
-
-```
-
-
-
+## Data Sample
 
 <div>
 <table border="1" class="dataframe">
@@ -370,30 +164,6 @@ test.head(5)
 
 
 
-```python
-#check the numbers of samples and features
-print("The train data size before dropping Id feature is : {} ".format(train.shape))
-print("The test data size before dropping Id feature is : {} ".format(test.shape))
-
-#Save the 'Id' column
-train_ID = train['Id']
-test_ID = test['Id']
-
-#Now drop the  'Id' colum since it's unnecessary for  the prediction process.
-train.drop("Id", axis = 1, inplace = True)
-test.drop("Id", axis = 1, inplace = True)
-
-#check again the data size after dropping the 'Id' variable
-print("\nThe train data size after dropping Id feature is : {} ".format(train.shape)) 
-print("The test data size after dropping Id feature is : {} ".format(test.shape))
-```
-
-    The train data size before dropping Id feature is : (1460, 81) 
-    The test data size before dropping Id feature is : (1459, 80) 
-    
-    The train data size after dropping Id feature is : (1460, 80) 
-    The test data size after dropping Id feature is : (1459, 79) 
-    
 
 #Data Processing
 
@@ -417,27 +187,17 @@ plt.show()
 ```
 
 
-![png](output_10_0.png)
+![png](images/output_10_0.png)
 
 
 We can see at the bottom right two with extremely large GrLivArea that are of a low price. These values are huge oultliers.
 Therefore, we can safely delete them.
 
 
-```python
-#Deleting outliers
-train = train.drop(train[(train['GrLivArea']>4000) & (train['SalePrice']<300000)].index)
-
-#Check the graphic again
-fig, ax = plt.subplots()
-ax.scatter(train['GrLivArea'], train['SalePrice'])
-plt.ylabel('SalePrice', fontsize=13)
-plt.xlabel('GrLivArea', fontsize=13)
-plt.show()
-```
 
 
-![png](output_12_0.png)
+
+![png](images/output_12_0.png)
 
 
 ###Note : 
@@ -450,40 +210,15 @@ There are probably others outliers in the training data.   However, removing all
 **SalePrice** is the variable we need to predict. So let's do some analysis on this variable first.
 
 
-```python
-sns.distplot(train['SalePrice'] , fit=norm);
-
-# Get the fitted parameters used by the function
-(mu, sigma) = norm.fit(train['SalePrice'])
-print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
-
-#Now plot the distribution
-plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
-            loc='best')
-plt.ylabel('Frequency')
-plt.title('SalePrice distribution')
-
-#Get also the QQ-plot
-fig = plt.figure()
-res = stats.probplot(train['SalePrice'], plot=plt)
-plt.show()
-```
-
-    C:\Users\kinga\Anaconda3\lib\site-packages\statsmodels\nonparametric\kdetools.py:20: VisibleDeprecationWarning: using a non-integer number instead of an integer will result in an error in the future
-      y = X[:m/2+1] + np.r_[0,X[m/2+1:],0]*1j
-    
 
     
-     mu = 180932.92 and sigma = 79467.79
-    
-    
 
 
-![png](output_16_2.png)
+![png](images/output_16_2.png)
 
 
 
-![png](output_16_3.png)
+![png](images/output_16_3.png)
 
 
 The target variable is right skewed.  As (linear) models love normally distributed data , we need to transform this variable and make it more normally distributed.
@@ -491,45 +226,15 @@ The target variable is right skewed.  As (linear) models love normally distribut
  **Log-transformation of the target variable**
 
 
-```python
-#We use the numpy fuction log1p which  applies log(1+x) to all elements of the column
-train["SalePrice"] = np.log1p(train["SalePrice"])
-
-#Check the new distribution 
-sns.distplot(train['SalePrice'] , fit=norm);
-
-# Get the fitted parameters used by the function
-(mu, sigma) = norm.fit(train['SalePrice'])
-print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
-
-#Now plot the distribution
-plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
-            loc='best')
-plt.ylabel('Frequency')
-plt.title('SalePrice distribution')
-
-#Get also the QQ-plot
-fig = plt.figure()
-res = stats.probplot(train['SalePrice'], plot=plt)
-plt.show()
-
-```
-
-    C:\Users\kinga\Anaconda3\lib\site-packages\statsmodels\nonparametric\kdetools.py:20: VisibleDeprecationWarning: using a non-integer number instead of an integer will result in an error in the future
-      y = X[:m/2+1] + np.r_[0,X[m/2+1:],0]*1j
-    
 
     
-     mu = 12.02 and sigma = 0.40
-    
-    
 
 
-![png](output_19_2.png)
+![png](images/output_19_2.png)
 
 
 
-![png](output_19_3.png)
+![png](images/output_19_3.png)
 
 
 The skew seems now corrected and the data appears more normally distributed. 
@@ -539,29 +244,9 @@ The skew seems now corrected and the data appears more normally distributed.
 let's first  concatenate the train and test data in the same dataframe
 
 
-```python
-ntrain = train.shape[0]
-ntest = test.shape[0]
-y_train = train.SalePrice.values
-all_data = pd.concat((train, test)).reset_index(drop=True)
-all_data.drop(['SalePrice'], axis=1, inplace=True)
-print("all_data size is : {}".format(all_data.shape))
-```
-
-    all_data size is : (2917, 79)
     
 
 ###Missing Data
-
-
-```python
-all_data_na = (all_data.isnull().sum() / len(all_data)) * 100
-all_data_na = all_data_na.drop(all_data_na[all_data_na == 0].index).sort_values(ascending=False)[:30]
-missing_data = pd.DataFrame({'Missing Ratio' :all_data_na})
-missing_data.head(20)
-```
-
-
 
 
 <div>
@@ -660,46 +345,17 @@ missing_data.head(20)
 
 
 
-```python
-f, ax = plt.subplots(figsize=(15, 12))
-plt.xticks(rotation='90')
-sns.barplot(x=all_data_na.index, y=all_data_na)
-plt.xlabel('Features', fontsize=15)
-plt.ylabel('Percent of missing values', fontsize=15)
-plt.title('Percent missing data by feature', fontsize=15)
-```
 
 
 
-
-    <matplotlib.text.Text at 0x1cbc6cbd358>
-
-
-
-
-![png](output_26_1.png)
+![png](images/output_26_1.png)
 
 
 **Data Correlation**
 
 
 
-```python
-#Correlation map to see how features are correlated with SalePrice
-corrmat = train.corr()
-plt.subplots(figsize=(12,9))
-sns.heatmap(corrmat, vmax=0.9, square=True)
-```
-
-
-
-
-    <matplotlib.axes._subplots.AxesSubplot at 0x1cbc6d03ef0>
-
-
-
-
-![png](output_28_1.png)
+![png](images/output_28_1.png)
 
 
 ###Imputing missing values 
@@ -863,17 +519,6 @@ all_data['MSSubClass'] = all_data['MSSubClass'].fillna("None")
 Is there any remaining missing value ? 
 
 
-```python
-#Check remaining missing values if any 
-all_data_na = (all_data.isnull().sum() / len(all_data)) * 100
-all_data_na = all_data_na.drop(all_data_na[all_data_na == 0].index).sort_values(ascending=False)
-missing_data = pd.DataFrame({'Missing Ratio' :all_data_na})
-missing_data.head()
-```
-
-
-
-
 <div>
 <table border="1" class="dataframe">
   <thead>
@@ -897,76 +542,23 @@ It remains no missing value.
 **Transforming some numerical variables that are really categorical**
 
 
-```python
-#MSSubClass=The building class
-all_data['MSSubClass'] = all_data['MSSubClass'].apply(str)
 
-
-#Changing OverallCond into a categorical variable
-all_data['OverallCond'] = all_data['OverallCond'].astype(str)
-
-
-#Year and month sold are transformed into categorical features.
-all_data['YrSold'] = all_data['YrSold'].astype(str)
-all_data['MoSold'] = all_data['MoSold'].astype(str)
-
-
-```
 
 **Label Encoding some categorical variables that may contain information in their ordering set** 
 
 
-```python
-from sklearn.preprocessing import LabelEncoder
-cols = ('FireplaceQu', 'BsmtQual', 'BsmtCond', 'GarageQual', 'GarageCond', 
-        'ExterQual', 'ExterCond','HeatingQC', 'PoolQC', 'KitchenQual', 'BsmtFinType1', 
-        'BsmtFinType2', 'Functional', 'Fence', 'BsmtExposure', 'GarageFinish', 'LandSlope',
-        'LotShape', 'PavedDrive', 'Street', 'Alley', 'CentralAir', 'MSSubClass', 'OverallCond', 
-        'YrSold', 'MoSold')
-# process columns, apply LabelEncoder to categorical features
-for c in cols:
-    lbl = LabelEncoder() 
-    lbl.fit(list(all_data[c].values)) 
-    all_data[c] = lbl.transform(list(all_data[c].values))
 
-# shape        
-print('Shape all_data: {}'.format(all_data.shape))
-
-
-
-```
-
-    Shape all_data: (2917, 78)
-    
 
 **Adding one more important feature**
 
 Since area related features are very important to determine house prices, we add one more feature which is the total area of basement, first and second floor areas of each house
 
 
-```python
-# Adding total sqfootage feature 
-all_data['TotalSF'] = all_data['TotalBsmtSF'] + all_data['1stFlrSF'] + all_data['2ndFlrSF']
-
-```
 
 **Skewed features**
 
 
-```python
-numeric_feats = all_data.dtypes[all_data.dtypes != "object"].index
 
-# Check the skew of all numerical features
-skewed_feats = all_data[numeric_feats].apply(lambda x: skew(x.dropna())).sort_values(ascending=False)
-print("\nSkew in numerical features: \n")
-skewness = pd.DataFrame({'Skew' :skewed_feats})
-skewness.head(10)
-
-```
-
-    
-    Skew in numerical features: 
-    
     
 
 
@@ -1038,78 +630,22 @@ See [this page][1] for more details on Box Cox Transformation as well as [the sc
 [2]: https://docs.scipy.org/doc/scipy-0.19.0/reference/generated/scipy.special.boxcox1p.html
 
 
-```python
-skewness = skewness[abs(skewness) > 0.75]
-print("There are {} skewed numerical features to Box Cox transform".format(skewness.shape[0]))
 
-from scipy.special import boxcox1p
-skewed_features = skewness.index
-lam = 0.15
-for feat in skewed_features:
-    #all_data[feat] += 1
-    all_data[feat] = boxcox1p(all_data[feat], lam)
-    
-#all_data[skewed_features] = np.log1p(all_data[skewed_features])
-```
 
     There are 59 skewed numerical features to Box Cox transform
     
 
-**Getting dummy categorical features**
-
-
-```python
-
-all_data = pd.get_dummies(all_data)
-print(all_data.shape)
-```
-
-    (2917, 220)
-    
-
-Getting the new train and test sets. 
-
-
-```python
-train = all_data[:ntrain]
-test = all_data[ntrain:]
-
-```
 
 #Modelling
 
-**Import librairies**
 
-
-```python
-from sklearn.linear_model import ElasticNet, Lasso,  BayesianRidge, LassoLarsIC
-from sklearn.ensemble import RandomForestRegressor,  GradientBoostingRegressor
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import RobustScaler
-from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
-from sklearn.model_selection import KFold, cross_val_score, train_test_split
-from sklearn.metrics import mean_squared_error
-import xgboost as xgb
-import lightgbm as lgb
-
-
-```
 
 **Define a cross validation strategy**
 
 We use the **cross_val_score** function of Sklearn. However this function has not a shuffle attribut, we add then one line of code,  in order to shuffle the dataset  prior to cross-validation
 
 
-```python
-#Validation function
-n_folds = 5
 
-def rmsle_cv(model):
-    kf = KFold(n_folds, shuffle=True, random_state=42).get_n_splits(train.values)
-    rmse= np.sqrt(-cross_val_score(model, train.values, y_train, scoring="neg_mean_squared_error", cv = kf))
-    return(rmse)
-```
 
 ##Base models
 
