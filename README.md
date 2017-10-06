@@ -640,6 +640,42 @@ See [this page][1] for more details on Box Cox Transformation as well as [the sc
 
 #Modelling
 
+In this approach, we add a meta-model on averaged base models and use the out-of-folds predictions of these base models to train our meta-model. 
+
+The procedure, for the training part, may be described as follows:
+
+
+1. Split the total training set into two disjoint sets (here **train** and .**holdout** )
+
+2. Train several base models on the first part (**train**)
+
+3. Test these base models on the second part (**holdout**)
+
+4. Use the predictions from 3)  (called  out-of-folds predictions) as the inputs, and the correct responses (target variable) as the outputs  to train a higher level learner called **meta-model**.
+
+The first three steps are done iteratively . If we take for example a 5-fold stacking , we first split the training data into 5 folds. Then we will do 5 iterations. In each iteration,  we train every base model on 4 folds and predict on the remaining fold (holdout fold). 
+
+So, we will be sure, after 5 iterations , that the entire data is used to get out-of-folds predictions that we will then use as 
+new feature to train our meta-model in the step 4.
+
+For the prediction part , We average the predictions of  all base models on the test data  and used them as **meta-features**  on which, the final prediction is done with the meta-model.
+
+
+![Faron](http://i.imgur.com/QBuDOjs.jpg)
+
+(Image taken from [Faron](https://www.kaggle.com/getting-started/18153#post103381))
+
+![kaz](http://5047-presscdn.pagely.netdna-cdn.com/wp-content/uploads/2017/06/image5.gif)
+
+Gif taken from [KazAnova's interview](http://blog.kaggle.com/2017/06/15/stacking-made-easy-an-introduction-to-stacknet-by-competitions-grandmaster-marios-michailidis-kazanova/)
+
+On this gif, the base models are algorithms 0, 1, 2 and the meta-model is algorithm 3. The entire training dataset is 
+A+B (target variable y known) that we can split into train part (A) and holdout part (B). And the test dataset is C. 
+
+B1 (which is the prediction from the holdout part)  is the new feature used to train the meta-model 3 and C1 (which
+is the prediction  from the test dataset) is the meta-feature on which the final prediction is done. 
+
+
 
 
 **Define a cross validation strategy**
@@ -845,41 +881,6 @@ Wow ! It seems even the simplest stacking approach really improve the score . Th
 us to go further and explore a less simple stacking approch. 
 
 ###Less simple Stacking : Adding a Meta-model
-
-In this approach, we add a meta-model on averaged base models and use the out-of-folds predictions of these base models to train our meta-model. 
-
-The procedure, for the training part, may be described as follows:
-
-
-1. Split the total training set into two disjoint sets (here **train** and .**holdout** )
-
-2. Train several base models on the first part (**train**)
-
-3. Test these base models on the second part (**holdout**)
-
-4. Use the predictions from 3)  (called  out-of-folds predictions) as the inputs, and the correct responses (target variable) as the outputs  to train a higher level learner called **meta-model**.
-
-The first three steps are done iteratively . If we take for example a 5-fold stacking , we first split the training data into 5 folds. Then we will do 5 iterations. In each iteration,  we train every base model on 4 folds and predict on the remaining fold (holdout fold). 
-
-So, we will be sure, after 5 iterations , that the entire data is used to get out-of-folds predictions that we will then use as 
-new feature to train our meta-model in the step 4.
-
-For the prediction part , We average the predictions of  all base models on the test data  and used them as **meta-features**  on which, the final prediction is done with the meta-model.
-
-
-![Faron](http://i.imgur.com/QBuDOjs.jpg)
-
-(Image taken from [Faron](https://www.kaggle.com/getting-started/18153#post103381))
-
-![kaz](http://5047-presscdn.pagely.netdna-cdn.com/wp-content/uploads/2017/06/image5.gif)
-
-Gif taken from [KazAnova's interview](http://blog.kaggle.com/2017/06/15/stacking-made-easy-an-introduction-to-stacknet-by-competitions-grandmaster-marios-michailidis-kazanova/)
-
-On this gif, the base models are algorithms 0, 1, 2 and the meta-model is algorithm 3. The entire training dataset is 
-A+B (target variable y known) that we can split into train part (A) and holdout part (B). And the test dataset is C. 
-
-B1 (which is the prediction from the holdout part)  is the new feature used to train the meta-model 3 and C1 (which
-is the prediction  from the test dataset) is the meta-feature on which the final prediction is done. 
 
 **Stacking averaged Models Class**
 
