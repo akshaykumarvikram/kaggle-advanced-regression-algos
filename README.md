@@ -2,6 +2,8 @@
 # Kaggle Challenge: House Prices: Advanced Regression Techniques<br>
 ## Currently in top 5% (143rd in 1890 participants), Last ran on: July 1st, 2017
 
+#### Note: Please refer the notebook for full code.
+
 
 
 
